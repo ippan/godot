@@ -3159,7 +3159,7 @@ String OS_Windows::get_locale() const {
 	LANGID langid = GetUserDefaultUILanguage();
 	String neutral;
 	int lang = langid & ((1 << 9) - 1);
-	int sublang = langid & ~((1 << 9) - 1);
+	int sublang = langid >> 10;
 
 	while (wl->locale) {
 
