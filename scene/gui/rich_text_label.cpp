@@ -399,7 +399,8 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 						line_ascent = line < l.ascent_caches.size() ? l.ascent_caches[line] : 1;
 						line_descent = line < l.descent_caches.size() ? l.descent_caches[line] : 1;
 					}
-					while (c[end] != 0 && !(end && c[end - 1] == ' ' && c[end] != ' ')) {
+
+					while ((!split_characters && c[end] != 0 && !(end && c[end - 1] == ' ' && c[end] != ' ')) || (split_characters && c[end] != 0)) {
 
 						int cw = font->get_char_size(c[end], c[end + 1]).width;
 						if (c[end] == '\t') {
@@ -414,6 +415,10 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 						fw += cw;
 
 						end++;
+
+						if (split_characters) {
+							break;
+						}
 					}
 					CHECK_HEIGHT(fh);
 					ENSURE_WIDTH(w);
@@ -422,7 +427,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 					line_descent = MAX(line_descent, descent);
 					fh = line_ascent + line_descent;
 
-					if (end && c[end - 1] == ' ') {
+					if (end && c[end - 1] == ' ' && !split_characters) {
 						if (p_mode == PROCESS_CACHE) {
 							spaces_size += font->get_char_size(' ').width;
 						} else if (align == ALIGN_FILL) {
@@ -2788,6 +2793,9 @@ void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_visible_characters", "amount"), &RichTextLabel::set_visible_characters);
 	ClassDB::bind_method(D_METHOD("get_visible_characters"), &RichTextLabel::get_visible_characters);
 
+	ClassDB::bind_method(D_METHOD("set_split_characters", "enable"), &RichTextLabel::set_split_characters);
+	ClassDB::bind_method(D_METHOD("get_split_characters"), &RichTextLabel::get_split_characters);
+
 	ClassDB::bind_method(D_METHOD("set_percent_visible", "percent_visible"), &RichTextLabel::set_percent_visible);
 	ClassDB::bind_method(D_METHOD("get_percent_visible"), &RichTextLabel::get_percent_visible);
 
@@ -2813,6 +2821,8 @@ void RichTextLabel::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "visible_characters", PROPERTY_HINT_RANGE, "-1,128000,1"), "set_visible_characters", "get_visible_characters");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "percent_visible", PROPERTY_HINT_RANGE, "0,1,0.001"), "set_percent_visible", "get_percent_visible");
+
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "split_characters"), "set_split_characters", "get_split_characters");
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "meta_underlined"), "set_meta_underline", "is_meta_underlined");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "tab_size", PROPERTY_HINT_RANGE, "0,24,1"), "set_tab_size", "get_tab_size");
@@ -2877,6 +2887,15 @@ int RichTextLabel::get_total_character_count() const {
 		tc += current_frame->lines[i].char_count;
 
 	return tc;
+}
+
+void RichTextLabel::set_split_characters(bool p_enable) {
+	split_characters = p_enable;
+	update();
+}
+
+bool RichTextLabel::get_split_characters() const {
+	return split_characters;
 }
 
 void RichTextLabel::set_fixed_size_to_width(int p_width) {
@@ -3012,6 +3031,8 @@ RichTextLabel::RichTextLabel() {
 	visible_characters = -1;
 	percent_visible = 1;
 	visible_line_count = 0;
+
+	split_characters = false;
 
 	fixed_width = -1;
 	fit_content_height = false;

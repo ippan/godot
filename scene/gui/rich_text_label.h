@@ -321,6 +321,8 @@ private:
 	int current_idx;
 	int visible_line_count;
 
+	bool split_characters;
+
 	int tab_size;
 	bool underline_meta;
 	bool override_selected_font_color;
@@ -489,6 +491,9 @@ public:
 	void set_visible_characters(int p_visible);
 	int get_visible_characters() const;
 	int get_total_character_count() const;
+
+	void set_split_characters(bool p_enable);
+	bool get_split_characters() const;
 
 	void set_percent_visible(float p_percent);
 	float get_percent_visible() const;
