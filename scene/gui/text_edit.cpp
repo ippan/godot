@@ -3429,7 +3429,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 				FALLTHROUGH;
 			}
 			case KEY_HOME: {
-#ifdef APPLE_STYLE_KEYS
+#if 0
 				if (k->get_shift())
 					_pre_shift_selection();
 
@@ -3490,7 +3490,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 				FALLTHROUGH;
 			}
 			case KEY_END: {
-#ifdef APPLE_STYLE_KEYS
+#if 0
 				if (k->get_shift())
 					_pre_shift_selection();
 
