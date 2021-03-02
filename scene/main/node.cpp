@@ -1378,7 +1378,14 @@ Node *Node::get_node_or_null(const NodePath &p_path) const {
 Node *Node::get_node(const NodePath &p_path) const {
 
 	Node *node = get_node_or_null(p_path);
-	ERR_FAIL_COND_V_MSG(!node, NULL, "Node not found: " + p_path + ".");
+	if (p_path.is_absolute()) {
+		ERR_FAIL_COND_V_MSG(!node, NULL,
+				vformat("(Node not found: \"%s\" (absolute path attempted from \"%s\").)", p_path, get_path()));
+	} else {
+		ERR_FAIL_COND_V_MSG(!node, NULL,
+				vformat("(Node not found: \"%s\" (relative to \"%s\").)", p_path, get_path()));
+	}
+
 	return node;
 }
 
@@ -1922,7 +1929,7 @@ bool Node::is_editable_instance(const Node *p_node) const {
 
 Node *Node::get_deepest_editable_node(Node *p_start_node) const {
 	ERR_FAIL_NULL_V(p_start_node, nullptr);
-	ERR_FAIL_COND_V(!is_a_parent_of(p_start_node), nullptr);
+	ERR_FAIL_COND_V(!is_a_parent_of(p_start_node), p_start_node);
 
 	Node const *iterated_item = p_start_node;
 	Node *node = p_start_node;
